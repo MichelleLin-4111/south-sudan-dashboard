@@ -28,7 +28,7 @@ except ImportError:  # pragma: no cover - optional for the EDA page
 
 
 st.set_page_config(
-    page_title="Displacement Risk in South Sudan",
+    page_title="Forced Displacement Tracker : South Sudan",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -37,6 +37,7 @@ st.set_page_config(
 SUMMARY_DATA_PATH = Path("data/state_round_enriched.csv")
 DASHBOARD_DATA_PATH = Path("data/state_round_modeling_complete.csv")
 MAP_PATH = Path("assets/south-sudan-map.png")
+ABOUT_PREVIEW_PATH = Path("assets/dashboard-preview.png")
 STATE_GEOJSON_PATH = Path("data/south_sudan_adm1.geojson")
 
 
@@ -282,77 +283,81 @@ def render_about_page(stats: dict) -> None:
             'alt="South Sudan map preview" />'
         )
 
-    st.markdown(
-        f"""
-        <div class="about-hero">
-            <div class="about-hero-quote">
-                “South Sudan has experienced one of the most severe,<br>humanitarian crises since its independence in 2011.”
+    preview_markup = '<div class="preview-card-placeholder">Dashboard preview coming soon</div>'
+    if ABOUT_PREVIEW_PATH.exists():
+        preview_encoded = base64.b64encode(ABOUT_PREVIEW_PATH.read_bytes()).decode("utf-8")
+        preview_markup = (
+            f'<img class="preview-card-image" src="data:image/png;base64,{preview_encoded}" '
+            'alt="Dashboard preview" />'
+        )
+
+    left_col, right_col = st.columns([0.58, 0.42], gap="large")
+
+    with left_col:
+        st.markdown(
+            """
+            <div class="content-card about-grid-card">
+                <div class="section-title">Overview</div>
+                <p class="body-copy">
+                    South Sudan has experienced one of the most severe humanitarian crises since its independence in 2011, with displacement remaining a persistent and complex challenge across the country. Across 13 DTM assessment rounds from 2018 to 2025, an estimated 1.3–2.3 million people were internally displaced. These patterns are shaped by overlapping conditions, including armed conflict, food insecurity, flooding, market instability, and infrastructure disruption, which can place civilians at heightened risk of displacement.
+                </p>
+                <p class="body-copy">
+                    This project examines how displacement rate changes across South Sudan's
+                    states and DTM assessment rounds. Rather than treating displacement as the
+                    result of a single factor, we explore how multiple contributing conditions, including
+                    conflict intensity, food insecurity, food prices, and environmental shocks,
+                    are associated with displacement patterns over time.
+                </p>
             </div>
-            <div class="about-hero-stat-row">
-                <div class="about-hero-stat">1.3–2.3M</div>
-                <div class="about-hero-label">People displaced across 13 DTM rounds (2018–2025)</div>
+            <div class="content-card about-grid-card about-grid-bottom">
+                <div class="section-title">About This Project</div>
+                <p class="body-copy">
+                    A major challenge in studying displacement is that humanitarian data is often
+                    fragmented and incomplete across sources. To address this, we construct a
+                    unified state-round panel dataset by integrating displacement records,
+                    conflict data, food security indicators, market price data, and flood-related
+                    variables.
+                </p>
+                <p class="body-copy">
+                    We use interpolation to improve coverage for missing feature values, allowing
+                    us to retain more usable observations for descriptive analysis. The final
+                    dashboard translates this enriched dataset into an interactive tool for
+                    exploring regional displacement trends, key contributing conditions, combined score index
+                     , and state-level differences.
+                </p>
             </div>
-        </div>
-        <div class="about-grid">
-            <div class="about-col">
-                <div class="content-card about-grid-card">
-                    <div class="section-title">Overview</div>
-                    <p class="body-copy">
-                        Forced displacement in South Sudan remains a severe and complex humanitarian
-                        challenge. Conflict, food insecurity, flooding, market instability, and
-                        infrastructure disruption can overlap across regions, creating conditions that
-                        place civilians at heightened risk of displacement.
-                    </p>
-                    <p class="body-copy">
-                        This project examines how displacement rate changes across South Sudan's
-                        states and DTM assessment rounds. Rather than treating displacement as the
-                        result of a single factor, we explore how multiple contributing conditions, including
-                        conflict intensity, food insecurity, food prices, and environmental shocks,
-                        are associated with displacement patterns over time.
-                    </p>
-                </div>
-                <div class="content-card about-grid-card about-grid-bottom">
-                    <div class="section-title">About This Project</div>
-                    <p class="body-copy">
-                        A major challenge in studying displacement is that humanitarian data is often
-                        fragmented and incomplete across sources. To address this, we construct a
-                        unified state-round panel dataset by integrating displacement records,
-                        conflict data, food security indicators, market price data, and flood-related
-                        variables.
-                    </p>
-                    <p class="body-copy">
-                        We use interpolation to improve coverage for missing feature values, allowing
-                        us to retain more usable observations for descriptive analysis. The final
-                        dashboard translates this enriched dataset into an interactive tool for
-                        exploring regional displacement trends, key contributing conditions, combined score index
-                         , and state-level differences.
-                    </p>
-                </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with right_col:
+        st.markdown(
+            f"""
+            <div class="about-map-block">
+                {map_markup}
             </div>
-            <div class="about-col">
-                <div class="about-map-block">
-                    {map_markup}
+            <div class="preview-card">
+                {preview_markup}
+                <div class="preview-card-body">
+                    <div class="preview-card-title">Explore Patterns and Regional Conditions</div>
+                    <div class="preview-card-copy">
+                        Gain deeper insight into how conflict patterns, food insecurity, market stress, and environmental shocks interact to shape displacement risk.
+                    </div>
                 </div>
-                <div class="content-card about-grid-card about-grid-bottom">
-                    <div class="section-title">How to Use This Dashboard</div>
-                    <p class="body-copy body-copy-tight">
-                        Use the Patterns page to explore displacement trends and contributing conditions over time.
-                        Use the Regional Map to compare IDPs and CSI scores across states and assessment rounds.
-                    </p>
-                </div>
-                <div class="content-card about-grid-card">
-                    <div class="section-title">Primary Stakeholders</div>
-                    <ul class="use-list">
-                        <li>Students </li>
-                        <li>Journalists</li>
-                        <li>Humanitarian organizations</li>
-                    </ul>
+                <div class="learn-more-button-wrapper">
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Learn More", key="about_learn_more"):
+            st.session_state["active_page"] = "Analysis"
+            st.rerun()
+        st.markdown(
+            """
                 </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_metric_card(label: str, value: str) -> None:
@@ -605,9 +610,9 @@ def render_eda() -> None:
         st.markdown(
             """
             <div class="content-card dashboard-placeholder">
-                <div class="section-title">Patterns</div>
+                <div class="section-title">Analysis</div>
                 <p class="body-copy">
-                    Pandas is not available in this environment, so the Patterns page cannot load yet.
+                    Pandas is not available in this environment, so the Analysis page cannot load yet.
                 </p>
             </div>
             """,
@@ -616,11 +621,11 @@ def render_eda() -> None:
         return
 
     if px is None:
-        st.warning("Plotly is required to render the Patterns page charts.")
+        st.warning("Plotly is required to render the Analysis page charts.")
         return
 
     if "month" not in df.columns:
-        st.warning("Patterns page cannot be rendered because the required column `month` is missing.")
+        st.warning("Analysis page cannot be rendered because the required column `month` is missing.")
         return
 
     patterns_df = df.copy()
@@ -628,11 +633,11 @@ def render_eda() -> None:
     patterns_df = patterns_df.dropna(subset=["month"]).sort_values("month")
 
     if patterns_df.empty:
-        st.warning("Patterns page cannot be rendered because there are no valid `month` values in the CSV.")
+        st.warning("Analysis page cannot be rendered because there are no valid `month` values in the CSV.")
         return
 
     if "round" not in patterns_df.columns:
-        st.warning("Patterns page cannot be rendered because the required column `round` is missing.")
+        st.warning("Analysis page cannot be rendered because the required column `round` is missing.")
         return
 
     conflict_col = resolve_first_available_column(patterns_df, ["acled_events_lag1", "acled_events"])
@@ -640,6 +645,105 @@ def render_eda() -> None:
         patterns_df, ["wfp_avg_usdprice_lag1", "wfp_avg_usdprice"]
     )
     flood_col = resolve_first_available_column(patterns_df, ["flood_flag", "flood_affected_people"])
+
+    total_idps_value = "Unavailable"
+    if "dtm_idp_ind" in patterns_df.columns:
+        total_idps = pd.to_numeric(patterns_df["dtm_idp_ind"], errors="coerce").sum(min_count=1)
+        if pd.notna(total_idps):
+            total_idps_value = f"{total_idps / 1_000_000:.1f}M"
+
+    avg_idp_rate_value = "Unavailable"
+    if "idp_per_1000" in patterns_df.columns:
+        avg_idp_rate = pd.to_numeric(patterns_df["idp_per_1000"], errors="coerce").mean()
+        if pd.notna(avg_idp_rate):
+            avg_idp_rate_value = f"{avg_idp_rate:.1f}"
+
+    highest_state_value = "Unavailable"
+    highest_state_description = "No state-round displacement rate is available."
+    if {"state", "round", "idp_per_1000"}.issubset(patterns_df.columns):
+        highest_rate_df = patterns_df.dropna(subset=["state", "round", "idp_per_1000"])
+        if not highest_rate_df.empty:
+            highest_row = highest_rate_df.loc[highest_rate_df["idp_per_1000"].idxmax()]
+            highest_state_value = str(highest_row["state"])
+            highest_state_description = (
+                f"Reached {highest_row['idp_per_1000']:.0f} IDPs per 1,000 people in {highest_row['round']}."
+            )
+
+    compound_share_value = "Unavailable"
+    if "regime" in patterns_df.columns:
+        regime_series = patterns_df["regime"].dropna().astype(str).str.strip().str.lower()
+        if not regime_series.empty:
+            compound_share = (regime_series == "compound").mean() * 100
+            compound_share_value = f"{compound_share:.1f}%"
+
+    st.markdown("## Key Findings")
+
+    finding_cols = st.columns(4, gap="medium")
+    finding_cards = [
+        (
+            total_idps_value,
+            "Recorded IDPs",
+            "Total IDP count across all state-round records.",
+        ),
+        (
+            avg_idp_rate_value,
+            "Avg. IDPs per 1,000",
+            "Average displacement rate across states and rounds.",
+        ),
+        (
+            highest_state_value,
+            "Highest rate observed",
+            highest_state_description,
+        ),
+        (
+            compound_share_value,
+            "Compound observations",
+            "State-rounds with multiple elevated pressures.",
+        ),
+    ]
+    for col, (value, label, description) in zip(finding_cols, finding_cards):
+        with col:
+            st.markdown(
+                f"""
+                <div style="
+                    background: #ffffff;
+                    border: 1px solid #d9e2ee;
+                    border-radius: 18px;
+                    padding: 1rem 1rem 0.95rem;
+                    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+                    min-height: 150px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                ">
+                    <div style="
+                        color: #143764;
+                        font-size: 1.65rem;
+                        font-weight: 800;
+                        line-height: 1.1;
+                        margin-bottom: 0.45rem;
+                    ">{value}</div>
+                    <div style="
+                        color: #10233a;
+                        font-size: 0.98rem;
+                        font-weight: 700;
+                        line-height: 1.35;
+                        margin-bottom: 0.5rem;
+                        min-height: 2.65rem;
+                    ">{label}</div>
+                    <div style="
+                        color: #6a7b8d;
+                        font-size: 0.88rem;
+                        line-height: 1.5;
+                        margin-top: auto;
+                    ">{description}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("<div style='height: 1.15rem;'></div>", unsafe_allow_html=True)
+    st.markdown("## Displacement Patterns Over Time")
 
     if "idp_per_1000" in patterns_df.columns:
         displacement_roundly = (
@@ -733,6 +837,119 @@ def render_eda() -> None:
             + ", ".join(f"`{column}`" for column in missing_heatmap_cols)
         )
 
+    st.markdown(
+        """
+        <div style="
+            background: #f7fafd;
+            border: 1px solid #d9e2ee;
+            border-radius: 16px;
+            padding: 0.95rem 1rem;
+            margin: 0.85rem 0 0.5rem;
+        ">
+            <div style="color: #24456f; font-size: 0.96rem; line-height: 1.6;">
+                <strong>What to notice:</strong> Unity stands out with the highest displacement rates in later rounds, especially R14 and R15, while Jonglei also rises strongly after R14. Some states show missing or lower values, so the heatmap helps reveal where displacement pressure is concentrated.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("<div style='height: 1.1rem;'></div>", unsafe_allow_html=True)
+
+    required_pre_post_cols = ["state", "period", "idp_per_1000"]
+    missing_pre_post_cols = [column for column in required_pre_post_cols if column not in patterns_df.columns]
+    if missing_pre_post_cols:
+        st.warning(
+            "Context chart unavailable because these required columns are missing: "
+            + ", ".join(f"`{column}`" for column in missing_pre_post_cols)
+        )
+    else:
+        period_df = (
+            patterns_df.dropna(subset=["state", "period", "idp_per_1000"])
+            .groupby(["state", "period"], as_index=False)["idp_per_1000"]
+            .mean()
+        )
+
+        if period_df.empty:
+            st.warning("Context chart could not be generated because no usable period data was available.")
+        else:
+            period_label_map = {
+                "pre_war": "Pre-war",
+                "post_war": "Post-war",
+            }
+            period_df["period_label"] = period_df["period"].map(period_label_map)
+            period_df = period_df.dropna(subset=["period_label"])
+
+            if period_df.empty:
+                st.warning(
+                    "Context chart could not be generated because `period` values were unavailable or unsupported."
+                )
+            else:
+                post_war_order = (
+                    period_df[period_df["period_label"] == "Post-war"]
+                    .sort_values("idp_per_1000", ascending=False)["state"]
+                    .tolist()
+                )
+                remaining_states = [
+                    state for state in period_df["state"].unique().tolist() if state not in post_war_order
+                ]
+                state_order = post_war_order + sorted(remaining_states)
+
+                pre_post_fig = px.bar(
+                    period_df,
+                    x="state",
+                    y="idp_per_1000",
+                    color="period_label",
+                    barmode="group",
+                    category_orders={
+                        "state": state_order,
+                        "period_label": ["Pre-war", "Post-war"],
+                    },
+                    color_discrete_map={
+                        "Pre-war": "#2b67c8",
+                        "Post-war": "#c0392b",
+                    },
+                    labels={
+                        "state": "State",
+                        "idp_per_1000": "Average IDPs per 1,000 people",
+                        "period_label": "Period",
+                    },
+                )
+                pre_post_fig.update_layout(
+                    dragmode=False,
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    margin={"l": 0, "r": 0, "t": 10, "b": 0},
+                    legend={"title": "Period", "orientation": "h", "y": 1.08, "x": 0},
+                )
+                pre_post_fig.update_xaxes(title_text="State", fixedrange=True, tickangle=-30)
+                pre_post_fig.update_yaxes(title_text="Average IDPs per 1,000 people", fixedrange=True)
+
+                st.subheader("Average Displacement Rate Before and After April 2023 (IDPs per 1,000 people)")
+                st.plotly_chart(
+                    pre_post_fig,
+                    config=PLOTLY_STATIC_CONFIG,
+                    use_container_width=True,
+                )
+
+                st.markdown(
+                    """
+                    <div style="
+                        background: #f7fafd;
+                        border: 1px solid #d9e2ee;
+                        border-radius: 16px;
+                        padding: 0.95rem 1rem;
+                        margin: 0.85rem 0 0.2rem;
+                    ">
+                        <div style="color: #24456f; font-size: 0.96rem; line-height: 1.6;">
+                            <strong>What to notice:</strong> April 2023 marks the outbreak of the Sudan conflict in neighboring Sudan. This is not the South Sudanese civil war, but it affected the wider region through cross-border displacement, disrupted trade, food price pressure, and added strain on humanitarian systems in South Sudan.
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    st.markdown("<div style='height: 1.1rem;'></div>", unsafe_allow_html=True)
     st.markdown("## Contributing Conditions Over Time")
     top_condition_cols = st.columns(2, gap="large")
     bottom_condition_cols = st.columns(2, gap="large")
@@ -908,47 +1125,41 @@ def render_eda() -> None:
                 "Flood exposure chart unavailable because neither `flood_flag` nor `flood_affected_people` exists in the CSV."
             )
 
-    st.markdown("## Combined Risk Factors and CSI Score")
     st.markdown(
         """
         <div style="
-            background: #ffffff;
+            background: #f7fafd;
             border: 1px solid #d9e2ee;
             border-radius: 16px;
-            padding: 1rem 1.1rem;
-            margin: 0.35rem 0 1rem;
+            padding: 0.95rem 1rem;
+            margin: 0.85rem 0 0.45rem;
         ">
-            <div style="
-                color: #10233a;
-                font-size: 1rem;
-                font-weight: 700;
-                margin-bottom: 0.55rem;
-            ">What is the CSI Score?</div>
-            <div style="
-                color: #4d5e72;
-                font-size: 0.96rem;
-                line-height: 1.6;
-            ">
-                <p style="margin: 0 0 0.75rem 0;">
-                    The Compound Shock Index (CSI) is a way to summarize multiple pressures affecting a region at the same time. It combines four key factors:
-                </p>
-                <ul style="margin: 0 0 0.75rem 1.1rem; padding: 0;">
-                    <li>Conflict events (number of ACLED conflict events)</li>
-                    <li>Food insecurity (share of population in IPC Phase 3+)</li>
-                    <li>Food price pressure (average WFP food price in USD)</li>
-                    <li>Flood exposure (presence of recent flood events: yes/no)</li>
-                </ul>
-                <p style="margin: 0 0 0.75rem 0;">
-                    Each factor is standardized and weighted equally, then combined into a single score from 0 to 100.
-                </p>
-                <p style="margin: 0;">
-                    Higher CSI values mean a state is experiencing stronger overall pressure from multiple conditions at once.
-                </p>
+            <div style="color: #24456f; font-size: 0.96rem; line-height: 1.6;">
+                <strong>What to notice:</strong> The contributing conditions shift at different times. Conflict events rise sharply in R14 and remain high in R15, while food price pressure peaks earlier around R10 before declining. Food insecurity also rises in R14, and flood exposure appears mainly in later rounds. This suggests that displacement pressure is shaped by overlapping but uneven conditions, not one single driver.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+    st.markdown("<div style='height: 1.1rem;'></div>", unsafe_allow_html=True)
+    st.markdown("## Overlapping Pressures Across States")
+
+    with st.expander("What is the CSI Score?", expanded=False):
+        st.markdown(
+            """
+            The Compound Shock Index (CSI) is a way to summarize multiple pressures affecting a region at the same time. It combines four key factors:
+
+            - Conflict events (number of ACLED conflict events)
+            - Food insecurity (share of population in IPC Phase 3+)
+            - Food price pressure (average WFP food price in USD)
+            - Flood exposure (presence of recent flood events: yes/no)
+
+            Each factor is standardized and weighted equally, then combined into a single score from 0 to 100.
+
+            Higher CSI values mean a state is experiencing stronger overall pressure from multiple conditions at once.
+            """
+        )
 
     st.subheader("CSI Score Over Time")
     if "csi_0_100" in patterns_df.columns:
@@ -980,6 +1191,23 @@ def render_eda() -> None:
         )
     else:
         st.warning("CSI chart unavailable because the required column `csi_0_100` is missing.")
+
+    st.markdown(
+        """
+        <div style="
+            background: #f7fafd;
+            border: 1px solid #d9e2ee;
+            border-radius: 16px;
+            padding: 0.95rem 1rem;
+            margin: 0.85rem 0 0.2rem;
+        ">
+            <div style="color: #24456f; font-size: 0.96rem; line-height: 1.6;">
+                <strong>What to notice:</strong> The CSI trend follows a similar shape to the average displacement rate trend: both rise sharply and peak around R14. This suggests that higher combined pressure coincides with higher displacement rates in the monitoring data. Unity also reaches its highest displacement rate around this later period.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown("<div style='height: 0.6rem;'></div>", unsafe_allow_html=True)
     st.subheader("CSI Score by State Over Time")
@@ -1032,34 +1260,12 @@ def render_eda() -> None:
         )
 
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div style="
-            background: #ffffff;
-            border: 1px solid #d9e2ee;
-            border-radius: 16px;
-            padding: 1rem 1.1rem;
-            margin: 0 0 1rem;
-        ">
-            <div style="
-                color: #10233a;
-                font-size: 1rem;
-                font-weight: 700;
-                margin-bottom: 0.55rem;
-            ">What are Active Shocks?</div>
-            <div style="
-                color: #4d5e72;
-                font-size: 0.96rem;
-                line-height: 1.6;
-            ">
-                <p style="margin: 0 0 0.75rem 0;">
-                    Active shocks count how many contributing conditions are elevated at the same time in a state-round. 
-                </p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    with st.expander("What are Active Shocks?", expanded=False):
+        st.markdown(
+            """
+            Active shocks count how many contributing conditions are elevated at the same time in a state-round.
+            """
+        )
     st.subheader("Average Displacement Rate (IDPs per 1,000 people) vs. Number of Active Shocks")
     if "shock_count" in patterns_df.columns and "idp_per_1000" in patterns_df.columns:
         shock_df = (
@@ -1111,35 +1317,18 @@ def render_eda() -> None:
         )
 
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div style="
-            background: #ffffff;
-            border: 1px solid #d9e2ee;
-            border-radius: 16px;
-            padding: 1rem 1.1rem;
-            margin: 0 0 1rem;
-        ">
-            <div style="
-                color: #10233a;
-                font-size: 1rem;
-                font-weight: 700;
-                margin-bottom: 0.55rem;
-            ">What do the regime labels mean?</div>
-            <div style="
-                color: #4d5e72;
-                font-size: 0.96rem;
-                line-height: 1.6;
-            ">
-                <p style="margin: 0 0 0.55rem 0;"><strong>Compound:</strong> 2+ conditions are happening at the same time. This is the most complex and high-pressure situation.</p>
-                <p style="margin: 0 0 0.55rem 0;"><strong>Conflict:</strong> Displacement is mainly associated with high levels of conflict, while other conditions are less severe.</p>
-                <p style="margin: 0 0 0.55rem 0;"><strong>Structural:</strong> Displacement remains high even without strong current shocks. This reflects long-term or persistent conditions where people are unable to return.</p>
-                <p style="margin: 0;"><strong>Stable:</strong> Fewer pressures are present, and displacement levels are lower or improving over time.</p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    with st.expander("What do the regime labels mean?", expanded=False):
+        st.markdown(
+            """
+            **Compound:** 2+ conditions are happening at the same time. This is the most complex and high-pressure situation.
+
+            **Conflict:** Displacement is mainly associated with high levels of conflict, while other conditions are less severe.
+
+            **Structural:** Displacement remains high even without strong current shocks. This reflects long-term or persistent conditions where people are unable to return.
+
+            **Stable:** Fewer pressures are present, and displacement levels are lower or improving over time.
+            """
+        )
     st.subheader("Displacement Regime Matrix with CSI Score")
     if go is None:
         st.warning("Displacement regime matrix unavailable because `plotly.graph_objects` is not available.")
@@ -1231,9 +1420,26 @@ def render_eda() -> None:
                 use_container_width=True,
             )
 
+    st.markdown(
+        """
+        <div style="
+            background: #f7fafd;
+            border: 1px solid #d9e2ee;
+            border-radius: 16px;
+            padding: 0.95rem 1rem;
+            margin: 0.85rem 0 0.2rem;
+        ">
+            <div style="color: #24456f; font-size: 0.96rem; line-height: 1.6;">
+                <strong>What to notice:</strong> The regime matrix shows that many states shift toward compound conditions in R14 and R15, meaning multiple pressures are elevated at once. Jonglei, Upper Nile, Lakes, Warrap, and Unity show especially high CSI values in later rounds. Stable and structural labels appear more often in earlier or lower-pressure state-rounds.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     if not loaded_from_csv:
         st.caption(
-            "The Patterns page is currently showing fallback dummy data because the CSV could not be loaded."
+            "The Analysis page is currently showing fallback dummy data because the CSV could not be loaded."
         )
 
 
@@ -1374,9 +1580,9 @@ def render_choreograph_page() -> None:
         st.markdown(
             """
             <div class="content-card">
-                <div class="section-title">Regional Map</div>
+                <div class="section-title">Maps</div>
                 <p class="body-copy">
-                    Pandas is not available in this environment, so the regional map cannot load yet.
+                    Pandas is not available in this environment, so the Maps page cannot load yet.
                 </p>
             </div>
             """,
@@ -1673,11 +1879,12 @@ st.markdown(
 
         div[role="radiogroup"] label {
             background: #e5eaf1;
+            border: 1px solid transparent;
             border-radius: 999px;
             padding: 0;
             overflow: hidden;
             cursor: pointer;
-            transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+            transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
         }
 
         div[role="radiogroup"] label:hover {
@@ -1685,9 +1892,13 @@ st.markdown(
             box-shadow: 0 8px 18px rgba(27, 47, 94, 0.10);
         }
 
-        div[role="radiogroup"] label[data-checked="true"] {
+        div[role="radiogroup"] label[data-checked="true"],
+        div[role="radiogroup"] label:has(input:checked),
+        div[role="radiogroup"] label[aria-checked="true"] {
             background: #2b67c8;
-            box-shadow: 0 8px 18px rgba(27, 47, 94, 0.16);
+            border-color: #1f4f96;
+            box-shadow: 0 10px 22px rgba(27, 47, 94, 0.20);
+            transform: translateY(-1px);
         }
 
         div[role="radiogroup"] label > div:first-child {
@@ -1703,7 +1914,15 @@ st.markdown(
             font-weight: 600;
         }
 
-        div[role="radiogroup"] label[data-checked="true"] span {
+        div[role="radiogroup"] label[data-checked="true"] span,
+        div[role="radiogroup"] label:has(input:checked) span,
+        div[role="radiogroup"] label[aria-checked="true"] span,
+        div[role="radiogroup"] label[data-checked="true"] p,
+        div[role="radiogroup"] label:has(input:checked) p,
+        div[role="radiogroup"] label[aria-checked="true"] p,
+        div[role="radiogroup"] label[data-checked="true"] * ,
+        div[role="radiogroup"] label:has(input:checked) *,
+        div[role="radiogroup"] label[aria-checked="true"] * {
             color: #ffffff;
         }
 
@@ -1886,14 +2105,69 @@ st.markdown(
             flex-direction: column;
             justify-content: stretch;
             width: 100%;
+            margin-bottom: 1rem;
         }
 
         .about-map-image {
             width: 100%;
-            aspect-ratio: 1.32 / 1;
+            aspect-ratio: 1.15 / 1;
             object-fit: cover;
             border-radius: 16px;
             display: block;
+        }
+
+        .preview-card {
+            background: #ffffff;
+            border: 1px solid #d9e2ee;
+            border-radius: 22px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-card-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            background: #eef3f8;
+        }
+
+        .preview-card-placeholder {
+            width: 100%;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #f7f9fc 0%, #edf2f7 100%);
+            color: #5d6d81;
+            font-weight: 700;
+            border-bottom: 1px solid #d9e2ee;
+        }
+
+        .preview-card-body {
+            padding: 1rem 1.15rem 0;
+            flex: 1 1 auto;
+        }
+
+        .preview-card-title {
+            color: #10233a;
+            font-size: 1.08rem;
+            font-weight: 700;
+            margin-bottom: 0.45rem;
+        }
+
+        .preview-card-copy {
+            color: #4d5e72;
+            font-size: 0.96rem;
+            line-height: 1.58;
+        }
+
+        .learn-more-button-wrapper {
+            padding: 0 1.15rem 1.1rem;
+            margin-top: 0.55rem;
         }
 
         .compact-card {
@@ -1991,6 +2265,58 @@ st.markdown(
             background: transparent;
         }
 
+        .learn-more-button-wrapper div[data-testid="stButton"] {
+            margin: 0;
+        }
+
+        .learn-more-button-wrapper div[data-testid="stButton"] > button {
+            background: #ef4444;
+            color: #ffffff;
+            border: 1px solid #ef4444;
+            border-radius: 12px;
+            padding: 0.42rem 1rem;
+            font-size: 0.94rem;
+            font-weight: 700;
+            line-height: 1.2;
+            box-shadow: 0 8px 18px rgba(239, 68, 68, 0.18);
+        }
+
+        .learn-more-button-wrapper div[data-testid="stButton"] > button:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .learn-more-button-wrapper div[data-testid="stButton"] > button:active,
+        .learn-more-button-wrapper div[data-testid="stButton"] > button:focus,
+        .learn-more-button-wrapper div[data-testid="stButton"] > button:focus-visible {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .learn-more-button-wrapper + div[data-testid="stButton"] {
+            margin-top: -0.45rem;
+            margin-bottom: 1rem;
+            padding-left: 1.15rem;
+        }
+
+        .learn-more-button-wrapper + div[data-testid="stButton"] > button {
+            background: linear-gradient(180deg, #ff5a4f 0%, #e23d34 100%);
+            color: #ffffff;
+            border: 1px solid #d93a30;
+            border-radius: 12px;
+            padding: 0.42rem 1rem;
+            font-size: 0.94rem;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(226, 61, 52, 0.16);
+        }
+
+        .learn-more-button-wrapper + div[data-testid="stButton"] > button:hover {
+            border-color: #cd332a;
+            color: #ffffff;
+        }
+
         .dashboard-placeholder {
             min-height: 260px;
             display: flex;
@@ -2039,7 +2365,7 @@ stats = load_summary_stats()
 st.markdown(
     """
     <div class="top-header">
-        <div class="header-title">Displacement Risk in South Sudan</div>
+        <div class="header-title">Forced Displacement Tracker : South Sudan</div>
         <div class="header-subtitle">
             Monitoring displacement patterns, contributing conditions, and regional variation across South Sudan        </div>
     </div>
@@ -2050,9 +2376,9 @@ st.markdown(
 
 selected_page = st.radio(
     "Navigation",
-    ["About", "Patterns", "Regional Map", "Pre/Post War"],
-    index=["About", "Patterns", "Regional Map", "Pre/Post War"].index(st.session_state["active_page"])
-    if st.session_state["active_page"] in ["About", "Patterns", "Regional Map", "Pre/Post War"]
+    ["About", "Analysis", "Maps"],
+    index=["About", "Analysis", "Maps"].index(st.session_state["active_page"])
+    if st.session_state["active_page"] in ["About", "Analysis", "Maps"]
     else 0,
     horizontal=True,
     label_visibility="collapsed",
@@ -2062,9 +2388,7 @@ st.session_state["active_page"] = selected_page
 
 if selected_page == "About":
     render_about_page(stats)
-elif selected_page == "Patterns":
+elif selected_page == "Analysis":
     render_eda()
-elif selected_page == "Regional Map":
-    render_choreograph_page()
 else:
-    render_pre_post_war_page()
+    render_choreograph_page()
